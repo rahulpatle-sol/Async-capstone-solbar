@@ -242,11 +242,11 @@ solana airdrop 2
 
 | Network | Program ID |
 |---|---|
-| **Devnet** | `DJ93cETS4yvu8e4SnySFkAwknXzLFJwYNd46EcH7WsUg` |
-| Localnet | `DJ93cETS4yvu8e4SnySFkAwknXzLFJwYNd46EcH7WsUg` |
+| **Devnet** | `7tEFkPBdbXw4XotSLPiXk2y26NESVEmbk7Jx9LN5uGDg` |
+| Localnet | `7tEFkPBdbXw4XotSLPiXk2y26NESVEmbk7Jx9LN5uGDg` |
 
 > View on Explorer:  
-> [https://explorer.solana.com/address/DJ93cETS4yvu8e4SnySFkAwknXzLFJwYNd46EcH7WsUg?cluster=devnet](https://explorer.solana.com/address/DJ93cETS4yvu8e4SnySFkAwknXzLFJwYNd46EcH7WsUg?cluster=devnet)
+> [https://explorer.solana.com/address/7tEFkPBdbXw4XotSLPiXk2y26NESVEmbk7Jx9LN5uGDg?cluster=devnet](https://explorer.solana.com/address/7tEFkPBdbXw4XotSLPiXk2y26NESVEmbk7Jx9LN5uGDg?cluster=devnet)
 
 ---
 
