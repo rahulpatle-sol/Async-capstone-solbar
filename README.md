@@ -17,6 +17,7 @@
 ---
 
 ## 📌 What is Solbar?
+ Project Definition & Market Analysis: **[view docs](https://docs.google.com/document/d/1IlwOP-_r_HwBYzFLlJ2B-B29vfmt9LJmx1PgRylue7w/edit?tab=t.0#heading=h.j9t7j2oj69qn)
 
 Solbar is a **Real World Asset (RWA) tokenization platform** built on Solana that enables fractional ownership of physical gold starting from **$100 minimum investment**.
 
@@ -57,7 +58,10 @@ Each token represents a fraction of physical gold held in custody. The platform 
     Admin Controls    Token-2022 Mint    KYC Gating
     Pause/Unpause     MintTo / Burn     Whitelist PDA
 ```
+User Stories: [view](https://docs.google.com/document/d/1ixmnzKMv-zm9QubuEKz7t9lUb2qBeeOTPP3BB6WHPzg/edit?tab=t.0)
 
+============================================
+Architecture Design:[view](https://docs.google.com/document/d/19Mzfr_O35-I1q2EzJuYXQBpGf62RJer5Z2LKY_D_J-s/edit?tab=t.0#heading=h.3gzwq3u0t8cn)
 ### PDA Structure
 
 | Account | Seeds | Purpose |
