@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-solbar = "DJ93cETS4yvu8e4SnySFkAwknXzLFJwYNd46EcH7WsUg"
+solbar = "7tEFkPBdbXw4XotSLPiXk2y26NESVEmbk7Jx9LN5uGDg"
 
 [registry]
 url = "https://api.apr.dev"

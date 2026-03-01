@@ -1,140 +1,84 @@
 use anchor_lang::prelude::*;
+
 pub mod constants;
 pub mod errors;
 pub mod state;
 pub mod instructions;
-pub mod hooks;
 
 use instructions::*;
-use hooks::transfer_hook::{TransferHookExecute, InitializeExtraAccountMetas};
-use state::{AssetType, KycLevel};
 
-declare_id!("DJ93cETS4yvu8e4SnySFkAwknXzLFJwYNd46EcH7WsUg");
+declare_id!("7tEFkPBdbXw4XotSLPiXk2y26NESVEmbk7Jx9LN5uGDg");
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+//   ███████╗ ██████╗ ██╗     ██████╗  █████╗ ██████╗ ██████╗
+//   ██╔════╝██╔═══██╗██║     ██╔══██╗██╔══██╗██╔══██╗╚════██╗
+//   ███████╗██║   ██║██║     ██████╔╝███████║██████╔╝  ▄███╔╝
+//   ╚════██║██║   ██║██║     ██╔══██╗██╔══██║██╔══██╗  ▀▀══╝
+//   ███████║╚██████╔╝███████╗██████╔╝██║  ██║██║  ██║  ██╗
+//   ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝  ╚═╝
+//
+//  RWA Gold Tokenization on Solana
+//  Program: Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS
+//
+//  5 Instructions:
+//    1. initialize        → Platform setup
+//    2. create_token      → Token-2022 mint + price bind
+//    3. add_to_whitelist  → KYC approve wallet
+//    4. swap              → SOL → Tokens
+//    5. burn_tokens       → Tokens → SOL
+//
+//  + remove_from_whitelist (admin)
+//  + toggle_pause          (admin)
+//
+// ═══════════════════════════════════════════════════════════════════════════════
 
 #[program]
 pub mod solbar {
     use super::*;
 
-    // ── Platform ──────────────────────────────────────────────────────────────
-
-    pub fn initialize(ctx: Context<Initialize>, fee_basis_points: u16) -> Result<()> {
-        instructions::initialize::initialize_handler(ctx, fee_basis_points)
+    // ── 1. Initialize ─────────────────────────────────────────────────────────
+    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
+        instructions::initialize::handler(ctx)
     }
 
-    pub fn update_platform(ctx: Context<UpdatePlatform>, new_fee_basis_points: u16, paused: bool) -> Result<()> {
-        instructions::initialize::update_platform_handler(ctx, new_fee_basis_points, paused)
+    // ── Admin: Toggle Pause ───────────────────────────────────────────────────
+    pub fn toggle_pause(ctx: Context<TogglePause>, paused: bool) -> Result<()> {
+        instructions::initialize::toggle_pause_handler(ctx, paused)
     }
 
-    pub fn transfer_authority(ctx: Context<TransferAuthority>) -> Result<()> {
-        instructions::initialize::transfer_authority_handler(ctx)
-    }
-
-    // ── Assets ────────────────────────────────────────────────────────────────
-
-    pub fn create_asset(
-        ctx: Context<CreateAsset>,
-        ticker: [u8; 12],
-        asset_type: AssetType,
-        price_feed_id: [u8; 64],
-        min_investment_usd_cents: u64,
-        asset_name: String,
-        asset_symbol: String,
+    // ── 2. Create Token ───────────────────────────────────────────────────────
+    pub fn create_token(
+        ctx: Context<CreateToken>,
+        price_per_token: u64,
+        decimals: u8,
     ) -> Result<()> {
-        instructions::create_asset::create_asset_handler(
-            ctx, ticker, asset_type, price_feed_id,
-            min_investment_usd_cents, asset_name, asset_symbol,
-        )
+        instructions::create_token::handler(ctx, price_per_token, decimals)
     }
 
-    pub fn toggle_asset(ctx: Context<ToggleAsset>, ticker: [u8; 12], active: bool) -> Result<()> {
-        instructions::create_asset::toggle_asset_handler(ctx, ticker, active)
-    }
-
-    // ── Whitelist / KYC ───────────────────────────────────────────────────────
-
+    // ── 3. Add to Whitelist ───────────────────────────────────────────────────
     pub fn add_to_whitelist(
         ctx: Context<AddToWhitelist>,
         wallet: Pubkey,
-        kyc_level: KycLevel,
-        kyc_expiry: i64,
-        country_code: [u8; 2],
     ) -> Result<()> {
-        instructions::whitelist::add_whitelist_handler(ctx, wallet, kyc_level, kyc_expiry, country_code)
+        instructions::whitelist::add_handler(ctx, wallet)
     }
 
-    pub fn approve_asset_for_wallet(ctx: Context<ApproveAssetForWallet>, wallet: Pubkey, ticker: [u8; 12]) -> Result<()> {
-        instructions::whitelist::approve_asset_handler(ctx, wallet, ticker)
-    }
-
-    pub fn revoke_asset_for_wallet(ctx: Context<RevokeAssetForWallet>, wallet: Pubkey, ticker: [u8; 12]) -> Result<()> {
-        instructions::whitelist::revoke_asset_handler(ctx, wallet, ticker)
-    }
-
-    pub fn deactivate_whitelist(ctx: Context<DeactivateWhitelist>, wallet: Pubkey) -> Result<()> {
-        instructions::whitelist::deactivate_handler(ctx, wallet)
-    }
-
-    pub fn renew_kyc(ctx: Context<RenewKyc>, wallet: Pubkey, new_expiry: i64, new_kyc_level: KycLevel) -> Result<()> {
-        instructions::whitelist::renew_kyc_handler(ctx, wallet, new_expiry, new_kyc_level)
-    }
-
-    // ── Minting ───────────────────────────────────────────────────────────────
-
-    pub fn mint_asset(ctx: Context<MintAsset>, ticker: [u8; 12], amount: u64, backing_units: u64) -> Result<()> {
-        instructions::mint_asset::mint_asset_handler(ctx, ticker, amount, backing_units)
-    }
-
-    // ── Price Oracle ──────────────────────────────────────────────────────────
-
-    pub fn update_price(
-        ctx: Context<UpdatePrice>,
-        ticker: [u8; 12],
-        raw_price: i64,
-        price_expo: i32,
-        confidence: u64,
-        publish_time: i64,
+    // ── Admin: Remove from Whitelist ──────────────────────────────────────────
+    pub fn remove_from_whitelist(
+        ctx: Context<RemoveFromWhitelist>,
+        wallet: Pubkey,
     ) -> Result<()> {
-        instructions::update_price::update_price_handler(ctx, ticker, raw_price, price_expo, confidence, publish_time)
+        instructions::whitelist::remove_handler(ctx, wallet)
     }
 
-    pub fn update_price_batch(
-        ctx: Context<UpdatePriceBatch>,
-        raw_prices: Vec<i64>,
-        price_expos: Vec<i32>,
-        confidences: Vec<u64>,
-        publish_times: Vec<i64>,
-    ) -> Result<()> {
-        instructions::update_price::update_price_batch_handler(ctx, raw_prices, price_expos, confidences, publish_times)
+    // ── 4. Swap (SOL → Token) ─────────────────────────────────────────────────
+    pub fn swap(ctx: Context<Swap>, sol_amount: u64) -> Result<()> {
+        instructions::swap::handler(ctx, sol_amount)
     }
 
-    // ── Redemption ────────────────────────────────────────────────────────────
-
-    pub fn burn_and_redeem(ctx: Context<BurnAndRedeem>, ticker: [u8; 12], amount: u64, nonce: u64) -> Result<()> {
-        instructions::burn_redeem::burn_and_redeem_handler(ctx, ticker, amount, nonce)
-    }
-
-    pub fn confirm_redemption(
-        ctx: Context<ConfirmRedemption>,
-        ticker: [u8; 12],
-        nonce: u64,
-        fulfillment_note: [u8; 64],
-        backing_units_released: u64,
-    ) -> Result<()> {
-        instructions::burn_redeem::confirm_redemption_handler(ctx, ticker, nonce, fulfillment_note, backing_units_released)
-    }
-
-    pub fn emergency_burn(ctx: Context<EmergencyBurn>, ticker: [u8; 12], amount: u64) -> Result<()> {
-        instructions::burn_redeem::emergency_burn_handler(ctx, ticker, amount)
-    }
-
-    // ── Transfer Hook ─────────────────────────────────────────────────────────
-
-    /// MUST be named `execute` — Token-2022 interface requirement
-    pub fn execute(ctx: Context<TransferHookExecute>, amount: u64) -> Result<()> {
-        hooks::transfer_hook::execute_hook(ctx, amount)
-    }
-
-    pub fn initialize_extra_account_metas(ctx: Context<InitializeExtraAccountMetas>) -> Result<()> {
-        hooks::transfer_hook::init_extra_metas_handler(ctx)
+    // ── 5. Burn Tokens (Token → SOL) ──────────────────────────────────────────
+    pub fn burn_tokens(ctx: Context<BurnTokens>, token_amount: u64) -> Result<()> {
+        instructions::burn_tokens::handler(ctx, token_amount)
     }
 }
