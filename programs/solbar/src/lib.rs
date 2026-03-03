@@ -5,12 +5,8 @@ pub mod errors;
 pub mod state;
 pub mod instructions;
 
-// Direct path imports — no glob (*) — fixes #[program] macro conflict
-use instructions::initialize::{Initialize, TogglePause};
-use instructions::create_token::CreateToken;
-use instructions::whitelist::{AddToWhitelist, RemoveFromWhitelist};
-use instructions::swap::Swap;
 
+pub use crate::instructions::*;
 
 declare_id!("7tEFkPBdbXw4XotSLPiXk2y26NESVEmbk7Jx9LN5uGDg");
 
