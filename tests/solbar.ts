@@ -1,6 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { Solbar2 } from "../target/types/solbar2";
+import { Solbar } from "../target/types/solbar";
 import {
   Keypair,
   SystemProgram,
