@@ -90,7 +90,7 @@ export default function Dashboard() {
   const [holdings,    setHoldings]    = useState<Holding[]>([]);
   const [lastUpdated, setLastUpdated] = useState("");
   const [timeframe,   setTimeframe]   = useState("1H");
-  const timerRef = useRef<NodeJS.Timeout>();
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // ── Load prices with 15s interval ─────────────────────────────────────────
   const loadPrices = useCallback(async () => {
@@ -113,7 +113,7 @@ export default function Dashboard() {
   useEffect(() => {
     loadPrices();
     timerRef.current = setInterval(loadPrices, 15_000);
-    return () => clearInterval(timerRef.current);
+   return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [loadPrices]);
 
   // Regenerate candles on asset change
